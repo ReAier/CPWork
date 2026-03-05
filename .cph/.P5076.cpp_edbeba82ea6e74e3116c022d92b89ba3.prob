@@ -1,0 +1,1 @@
+{"name":"Local: P5076","url":"d:\\VSCWork\\P5076.cpp","tests":[{"id":1756371532061,"input":"7\n5 1\n5 3\n5 5\n1 3\n2 2\n3 3\n4 3","output":"2\n3\n1\n5\n"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\VSCWork\\P5076.cpp","group":"local","local":true}

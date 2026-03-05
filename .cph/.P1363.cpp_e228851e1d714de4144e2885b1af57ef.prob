@@ -1,0 +1,1 @@
+{"name":"Local: P1363","url":"d:\\VSCWork\\P1363.cpp","tests":[{"id":1756540144888,"input":"5 4\n##.#\n##S#\n#..#\n#.##\n#..#\n5 4\n##.#\n##S#\n#..#\n..#.\n#.##\n","output":"Yes\nNo\n\n"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\VSCWork\\P1363.cpp","group":"local","local":true}

@@ -1,0 +1,1 @@
+{"name":"Local: P3371","url":"d:\\VSCWork\\P3371.cpp","tests":[{"id":1754297350800,"input":"4 6 1\n1 2 2\n2 3 2\n2 4 1\n1 3 5\n3 4 3\n1 4 4","output":"0 2 4 3"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\VSCWork\\P3371.cpp","group":"local","local":true}

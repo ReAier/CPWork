@@ -1,0 +1,1 @@
+{"name":"Local: Atc2","url":"d:\\VSCWork\\Atc2.cpp","tests":[{"id":1756555610407,"input":"1 1\n","output":"415\n"},{"id":1756555922495,"input":"3 7\n","output":"895\n"},{"id":1756555933604,"input":"90701 90204\n","output":"9560800101\n"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\VSCWork\\Atc2.cpp","group":"local","local":true}
