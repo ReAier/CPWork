@@ -11,14 +11,14 @@
 using namespace std;
 const int maxn=1e6+10,INF=0x3f3f3f3f,mod=1e9+7;
 const double eps=1e-8,Pi=acos(-1);
-int n,m;
+int n,m,a,b;
 
 
 void solve(){
     
 }
 void init(){
-    
+    cin>>n>>a>>b;
 }
 int main(){
 #ifdef OPEN_FILE
