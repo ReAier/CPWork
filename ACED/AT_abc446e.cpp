@@ -9,16 +9,34 @@
 #define ull unsigned long long
 #define pii pair<int,int>
 using namespace std;
-const int maxn=1e6+10,INF=0x3f3f3f3f,mod=1e9+7;
+const int maxn=1e3+10,INF=0x3f3f3f3f,mod=1e9+7;
 const double eps=1e-8,Pi=acos(-1);
-int n,m,a,b;
-
-
+ll n,m,a,b;
+vector<pii>e[maxn][maxn];
+bool vis[maxn][maxn];
+queue<pii>q;
 void solve(){
-    
+    for(int i=0;i<n;++i)
+        q.push({i,0}),q.push({0,i});
+    while(q.size()){
+        auto[u1,u2]=q.front();q.pop();
+        // cout<<u1<<" "<<u2<<endl;
+        vis[u1][u2]=1;
+        for(auto [v1,v2]:e[u1][u2]) if(!vis[v1][v2])
+            q.push({v1,v2});
+    }
+    int ans=0;
+    for(int i=0;i<n;++i) for(int j=0;j<n;++j)
+        if(!vis[i][j])
+            ++ans;
+    cout<<ans<<'\n';
 }
 void init(){
     cin>>n>>a>>b;
+    for(int i=0;i<n;++i){
+        for(int j=0;j<n;++j)
+            e[j][(b*i+a*j)%n].push_back({i,j});
+    }
 }
 int main(){
 #ifdef OPEN_FILE
