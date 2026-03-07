@@ -12,19 +12,40 @@ using namespace std;
 const int maxn=1e6+10,INF=0x3f3f3f3f,mod=1e9+7;
 const double eps=1e-8,Pi=acos(-1);
 int n,m;
-vector<int>e[maxn];
 
+struct STtable{
+    ll mia[maxn][25];
+    ll GetMin(ll l,ll r){
+        ll dif=r-l+1,ans=INF;
+        if(l>r) return INF;
+        for(ll i=20;i>=0;--i) if((dif>>i)&1)
+            ans=min(mia[l][i],ans),l+=1<<i;
+        return ans;
+    }
+    void Init(){
+        for(ll k=1;k<=20;++k) for(ll i=1;i<=n;++i)
+            mia[i][k]=min(mia[i+(1<<(k-1))][k-1],mia[i][k-1]);
+    }
+}st;
+int b[10];
 void solve(){
-    
+    int k;
+    while(m--){
+        cin>>k;
+        for(int i=1;i<=k;++i)
+            cin>>b[i];
+        b[k+1]=n+1;
+        ll ans=INF;
+        for(int i=1;i<=k+1;++i)
+            ans=min(ans,st.GetMin(b[i-1]+1,b[i]-1));
+        cout<<ans<<'\n';
+    }
 }
 void init(){
     cin>>n>>m;
-    int u,v;
-    for(int i=1;i<=m;++i){
-        cin>>u>>v;
-        if(u>v) swap(u,v);
-        e[v].push_back(u);
-    }
+    for(int i=1;i<=n;++i)
+        cin>>st.mia[i][0];
+    st.Init();
 }
 int main(){
 #ifdef OPEN_FILE

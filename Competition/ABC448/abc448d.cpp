@@ -13,18 +13,41 @@ const int maxn=1e6+10,INF=0x3f3f3f3f,mod=1e9+7;
 const double eps=1e-8,Pi=acos(-1);
 int n,m;
 vector<int>e[maxn];
+int a[maxn];
+int cnt[maxn],idx,cncnt;
+map<int,int>mp;
+bool ans[maxn];
+
+void Dfs(int u,int fa){
+    ++cnt[a[u]];
+    if(cnt[a[u]]==2)
+        ++cncnt;
+    ans[u]=cncnt;
+
+    for(int v:e[u]) if(v!=fa)
+        Dfs(v,u);
+
+    --cnt[a[u]];
+    if(cnt[a[u]]==1)
+        --cncnt;
+}
 
 void solve(){
-    
+    Dfs(1,0);
+    for(int i=1;i<=n;++i)
+        cout<<(ans[i]?"Yes\n":"No\n");
 }
 void init(){
-    cin>>n>>m;
-    int u,v;
-    for(int i=1;i<=m;++i){
-        cin>>u>>v;
-        if(u>v) swap(u,v);
-        e[v].push_back(u);
+    cin>>n;
+    for(int i=1;i<=n;++i){
+        cin>>a[i];
+        if(!mp[a[i]])
+            mp[a[i]]=++idx;
+        a[i]=mp[a[i]];
     }
+    int u,v;
+    for(int i=1;i<n;++i)
+        cin>>u>>v,e[u].push_back(v),e[v].push_back(u);
 }
 int main(){
 #ifdef OPEN_FILE

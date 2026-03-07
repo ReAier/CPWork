@@ -12,19 +12,21 @@ using namespace std;
 const int maxn=1e6+10,INF=0x3f3f3f3f,mod=1e9+7;
 const double eps=1e-8,Pi=acos(-1);
 int n,m;
-vector<int>e[maxn];
+ll a[maxn],b[maxn];
 
 void solve(){
-    
+    ll ans=0;
+    for(int i=1;i<=m;++i)
+        ans+=min(a[i],b[i]);
+    cout<<ans;
 }
 void init(){
     cin>>n>>m;
+    for(int i=1;i<=m;++i)
+        cin>>a[i];
     int u,v;
-    for(int i=1;i<=m;++i){
-        cin>>u>>v;
-        if(u>v) swap(u,v);
-        e[v].push_back(u);
-    }
+    for(int i=1;i<=n;++i)
+        cin>>u>>v,b[u]+=v;
 }
 int main(){
 #ifdef OPEN_FILE
