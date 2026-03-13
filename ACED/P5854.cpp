@@ -9,22 +9,31 @@
 #define ull unsigned long long
 #define pii pair<int,int>
 using namespace std;
-const int maxn=1e6+10,INF=0x3f3f3f3f,mod=1e9+7;
+const int maxn=1e7+10,INF=0x3f3f3f3f,mod=1e9+7;
 const double eps=1e-8,Pi=acos(-1);
 int n,m;
-vector<int>e[maxn];
+int a[maxn],ls[maxn],rs[maxn];
 
-void solve(){
-    
+int st[maxn],top;
+void solve(){   
+    ll ansl=0,ansr=0;
+    for(int i=1;i<=n;++i){
+        int cur=top;
+        while(cur&&a[st[cur]]>a[i]) 
+            --cur;
+        if(cur) rs[st[cur]]=i;
+        if(cur<top) ls[i]=st[cur+1];
+        top=cur;
+        st[++top]=i;
+    }
+    for(ll i=1;i<=n;++i)
+        ansl^=(ll)(i*(ls[i]+1)),ansr^=(ll)(i*(rs[i]+1));
+    cout<<ansl<<" "<<ansr<<'\n';
 }
 void init(){
-    cin>>n>>m;
-    int u,v;
-    for(int i=1;i<=m;++i){
-        cin>>u>>v;
-        if(u>v) swap(u,v);
-        e[v].push_back(u);
-    }
+    cin>>n;
+    for(int i=1;i<=n;++i)
+        cin>>a[i];
 }
 int main(){
 #ifdef OPEN_FILE
@@ -34,7 +43,7 @@ int main(){
 #ifdef OPEN_TIME
     auto StartTime=clock();
 #endif
-    // ios::sync_with_stdio(false),cin.tie(nullptr),cout.tie(nullptr);
+    ios::sync_with_stdio(false),cin.tie(nullptr),cout.tie(nullptr);
     int T=1;
     // cin>>T;
     // while(cin>>n){

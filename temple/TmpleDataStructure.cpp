@@ -55,19 +55,37 @@ struct Trie01{
     }
 };
 
+struct Dkt{
+    int st[maxn],top;
+    int a[maxn],ls[maxn],rs[maxn];
+    void Build(){
+        for(int i=1;i<=n;++i){
+            int cur=top;
+            while(cur&&a[st[cur]]>a[i]) 
+                --cur;
+            if(cur) rs[st[cur]]=i;
+            if(cur<top) ls[i]=st[cur+1];
+            top=cur;
+            st[++top]=i;
+        }
+    }
+};
+
 struct STtable{
-    ll mia[maxn][25];
-    ll GetMin(ll l,ll r){
-        ll dif=r-l+1,ans=INF;
-        for(ll i=20;i>=0;--i) if((dif>>i)&1)
-            ans=min(mia[l][i],ans),l+=1<<i;
-        return ans;
+    ll mxa[maxn][25];
+    ll Log2[maxn];
+    ll GetMax(ll l,ll r){
+        ll dif=Log2[r-l+1];
+        return max(mxa[l][dif],mxa[r-(1<<dif)+1][dif]);
     }
     void Init(){
         for(ll k=1;k<=20;++k) for(ll i=1;i<=n;++i)
-            mia[i][k]=min(mia[i+(1<<(k-1))][k-1],mia[i][k-1]);
+            mxa[i][k]=max(mxa[i+(1<<(k-1))][k-1],mxa[i][k-1]);
+        Log2[1]=0;
+        for(int i=2;i<=n;++i)
+            Log2[i]=Log2[i/2]+1;
     }
-};
+}st;
 
 struct FHQTreap2{
     struct Node{
