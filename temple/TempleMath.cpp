@@ -1,5 +1,6 @@
 #include <bits/stdc++.h>
 using namespace std;
+#define ll long long
 
 const int maxn=1e4+10,INF=0x3f3f3f3f,mod=1e9+7;
 const double eps=1e-8;
@@ -216,6 +217,25 @@ struct NubThe{
     }
     
 };
+
+struct Combin{
+    ll Catalan[maxn];
+    ll fac[maxn];
+    void GetCatalan(){
+        Catalan[1]=1;
+        for(int i=2;i<=n;++i)
+            Catalan[i]=Catalan[i-1]*(4*i-2)/(i+1);
+    }
+    ll C(int a,int b){
+        return fac[a]/(fac[b]*fac[a-b]);
+    }
+    void GetFac(){
+        fac[0]=1;
+        for(int i=1;i<=n;++i)
+            fac[i]=fac[i-1]*i;
+    }
+};
+
 
 int main() {
     return 0;
