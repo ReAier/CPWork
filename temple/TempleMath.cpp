@@ -226,13 +226,24 @@ struct Combin{
         for(int i=2;i<=n;++i)
             Catalan[i]=Catalan[i-1]*(4*i-2)/(i+1);
     }
-    ll C(int a,int b){
-        return fac[a]/(fac[b]*fac[a-b]);
-    }
+    // ll C(int a,int b){
+    //     return fac[a]/(fac[b]*fac[a-b]);
+    // }
     void GetFac(){
         fac[0]=1;
         for(int i=1;i<=n;++i)
             fac[i]=fac[i-1]*i;
+    }
+    ll C[maxn][maxn],sum[maxn][maxn];
+    void GetC(){
+            C[0][0]=sum[0][0]=1;
+        for(int i=1;i<=maxn-1;++i){
+            C[i][i]=C[i][0]=sum[i][0]=1;
+            for(int j=1;j<=maxn-1;++j)
+                C[i][j]=(C[i-1][j-1]+C[i-1][j])%mod;
+            for(int j=1;j<=maxn-1;++j)  
+                sum[i][j]=(sum[i][j-1]+C[i][j])%mod;
+        }
     }
 };
 
