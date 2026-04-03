@@ -443,6 +443,35 @@ struct LCT{
     }
 };
 
+struct Tree{
+    vector<int>e[maxn];
+    int dep[maxn],fa[maxn],son[maxn],siz[maxn],top[maxn];
+    void Dfs1(int u,int f){
+        dep[u]=dep[fa[u]=f]+(siz[u]=1);
+        for(int v:e[u]) if(v!=f){
+            Dfs1(v,u);
+            siz[u]+=siz[v];
+            if(siz[v]>siz[son[u]])
+                son[u]=v;
+        }
+    }
+    void Dfs2(int u,int tp){
+        top[u]=tp;
+        if(!son[u]) return;
+        Dfs2(son[u],tp);
+        for(int v:e[u]) if(v!=fa[u]&&v!=son[u])
+            Dfs2(v,v);
+    }
+    int GetLCA(int u,int v){
+        while(top[u]!=top[v]){
+            if(dep[top[u]]<dep[top[v]])
+                swap(u,v);
+            u=fa[top[u]];
+        }
+        return dep[u]>dep[v]?v:u;
+    }
+};
+
 void solve(){
     
 }
