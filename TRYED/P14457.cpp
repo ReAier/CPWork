@@ -12,13 +12,17 @@ using namespace std;
 const int maxn=1e6+10,INF=0x3f3f3f3f,mod=1e9+7;
 const double eps=1e-8,Pi=acos(-1);
 int n,m;
-
+int a[maxn],b[maxn];
 
 void solve(){
     
 }
 void init(){
-    
+    cin>>n;
+    for(int i=1;i<=n;++i)
+        cin>>a[i];
+    for(int i=1;i<=n;++i)
+        cin>>b[i];
 }
 int main(){
 #ifdef OPEN_FILE
@@ -30,7 +34,7 @@ int main(){
 #endif
     // ios::sync_with_stdio(false),cin.tie(nullptr),cout.tie(nullptr);
     int T=1;
-    // cin>>T;
+    cin>>T;
     // while(cin>>n){
     while(T--){
         init();
