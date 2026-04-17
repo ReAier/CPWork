@@ -7,38 +7,38 @@
 #define lowbit(x) (x&(-x))
 #define ll long long
 #define ull unsigned long long
-#define pii pair<int,int>
+#define pii pair<int,ll>
 using namespace std;
 const int maxn=1e6+10,INF=0x3f3f3f3f,mod=1e9+7;
 const double eps=1e-8,Pi=acos(-1);
 int n,m;
-int a[maxn];
-vector<int>e[maxn];
+ll wmax,a[maxn];
+struct Edge{
+    ll v,w,id;
+};
+vector<Edge>e[maxn];
 int siz[maxn],son[maxn],fa[maxn];
+int pos[maxn];
 struct Info{
-    int M[2][2];
-    Info(int val=-INF){
-        M[0][0]=M[0][1]=0;
-        M[1][0]=val,M[1][1]=-INF;
-    }
-    int *operator[](const int x){
-        return M[x];
+    ll lmax,rmax,len,ans;
+    Info(ll val=0){
+        lmax=rmax=len=ans=val;
     }
 };
 Info Compress(Info &u,Info &v){
     Info res;
-    res[0][0]=max(v[0][0]+u[0][0],v[0][1]+u[1][0]);
-    res[0][1]=max(v[0][0]+u[0][1],v[0][1]+u[1][1]);
-    res[1][0]=max(v[1][0]+u[0][0],v[1][1]+u[1][0]);
-    res[1][1]=max(v[1][0]+u[0][1],v[1][1]+u[1][1]);
+    res.len=u.len+v.len;
+    res.ans=max({u.ans,v.ans,u.rmax+v.lmax});
+    res.lmax=max(u.lmax,u.len+v.lmax);
+    res.rmax=max(v.rmax,v.len+u.rmax);
     return res;
 }
 Info Rake(Info &u,Info &v){
     Info res;
-    res[0][0]=u[0][0]+max(v[0][0],v[1][0]);
-    res[0][1]=u[0][1]+max(v[0][1],v[1][1]);
-    res[1][0]=u[1][0]+max(v[0][0],v[1][0]);
-    res[1][1]=u[1][1]+max(v[0][1],v[1][1]);
+    res.len=u.len;
+    res.ans=max({u.ans,v.ans,u.lmax+v.lmax});
+    res.lmax=max(u.lmax,v.lmax);
+    res.rmax=max(u.rmax,u.len+v.lmax);
     return res;
 }
 struct TopTree{
@@ -55,7 +55,7 @@ struct TopTree{
 #define siz(p) t[p].siz
 #define ty(p) t[p].ty
     int idx,rt;
-    int NewNode(bool ty,int val=-INF){
+    int NewNode(bool ty,ll val=0){
         t[++idx]={0,0,0,{val},ty,1};
         return idx;
     }
@@ -82,49 +82,48 @@ struct TopTree{
         if(p<=n) H.push_back(p);
         for(int u=p;son[u];u=son[u]){
             vector<int>L;
-            for(int v:e[u]) if(v^fa[u]&&v^son[u]) 
+            for(auto[v,w,id]:e[u]) if(v^fa[u]&&v^son[u]) 
                 L.push_back(Build(v));
             if(!L.size()) H.push_back(son[u]);
             else H.push_back(Merge(son[u],SubBuild(L,0,L.size()-1,1),1));
         }
         return SubBuild(H,0,H.size()-1,0);
     }
-    void Change(int u,int k){
+    void Change(int u,ll k){
         val(u)={k};
         while(u=fa(u)) PushUp(u); 
     }
-    int Query(){
-        return max(val(rt)[0][0],val(rt)[1][0]);
+    ll Query(){
+        return val(rt).ans;
     }
     void Init(){
         for(int i=1;i<=n;++i)
             NewNode(0,a[i]);
-        rt=Build(n+1);
+        rt=Build(1);
     }
 }t;
 void Dfs(int u,int p){
     siz[u]=1,fa[u]=p;
-    for(int v:e[u]) if(v^p)
-        Dfs(v,u),siz[u]+=siz[v],siz[v]>siz[son[u]]?son[u]=v:0;
+    for(auto[v,w,id]:e[u]) if(v^p)
+        Dfs(v,u),pos[id]=v,a[v]=w,siz[u]+=siz[v],siz[v]>siz[son[u]]?son[u]=v:0;
 }
 
 void solve(){
-    int u,w;
+    ll lasans=0,u,w;
     while(m--){
         cin>>u>>w;
-        t.Change(u,w);
-        cout<<t.Query()<<'\n';
+        u=(u+lasans)%(n-1);
+        w=(w+lasans)%wmax;
+        t.Change(pos[u+1],w);
+        cout<<(lasans=t.Query())<<'\n';
     }
 }
 void init(){
-    cin>>n>>m;
-    for(int i=1;i<=n;++i)
-        cin>>a[i];
-    int u,v;
+    cin>>n>>m>>wmax;
+    ll u,v,w;
     for(int i=1;i<n;++i)
-        cin>>u>>v,e[u].push_back(v),e[v].push_back(u);
-    e[n+1].push_back(1),e[1].push_back(n+1);
-    Dfs(n+1,0);
+        cin>>u>>v>>w,e[u].push_back({v,w,i}),e[v].push_back({u,w,i});
+    Dfs(1,0);
     t.Init();
 }
 int main(){

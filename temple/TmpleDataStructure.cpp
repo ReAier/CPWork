@@ -560,7 +560,7 @@ namespace TopTree{
             return max(val(rt)[0][0],val(rt)[1][0]);
         }
         void Init(){
-            for(int i=1;i<=n+1;++i)
+            for(int i=1;i<=n;++i)
                 NewNode(0,a[i]);
             rt=Build(n+1);
         }
@@ -570,7 +570,6 @@ namespace TopTree{
         for(int v:e[u]) if(v^p)
             Dfs(v,u),siz[u]+=siz[v],siz[v]>siz[son[u]]?son[u]=v:0;
     }
-
     void solve(){
         int u,w;
         while(m--){
