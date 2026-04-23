@@ -85,7 +85,7 @@ struct STtable{
         for(int i=2;i<=n;++i)
             Log2[i]=Log2[i/2]+1;
     }
-}st;
+};
 
 struct FHQTreap2{
     struct Node{
@@ -470,6 +470,14 @@ struct Tree{
         }
         return dep[u]>dep[v]?v:u;
     }
+    int GetDis(int u,int v){
+        int lca=GetLCA(u,v);
+        return dep[u]+dep[v]-2*dep[lca];
+    }
+    void Init(){
+        Dfs1(1,0);
+        Dfs2(1,1);
+    }
 };
 
 namespace TopTree{
@@ -591,6 +599,191 @@ namespace TopTree{
     }
 } // namespace TopTree
 
+namespace NodeDivide{
+    vector<pair<int,int>>e[maxn];
+    int rt;
+    int siz[maxn],mxp[maxn];
+    bool vis[maxn];
+    void GetRT(int u,int fa,int tot){
+        siz[u]=1,mxp[u]=0;
+        for(auto[v,w]:e[u])if(v!=fa&&!vis[v])
+            GetRT(v,u,tot),siz[u]+=siz[v],mxp[u]=max(mxp[u],siz[v]);
+        mxp[u]=max(mxp[u],tot-siz[u]);
+        if(mxp[u]<mxp[rt]) rt=u;
+    }
+    struct BIT{
+        int t[int(2e4)+100];
+        void Add(int x,int k){
+            x++;
+            while(x<=m+10)
+                t[x]+=k,x+=lowbit(x);
+        }
+        int Query(int x){
+            x++;
+            if(x>m+10) x=m+10;
+            int ans=0;
+            while(x)
+                ans+=t[x],x-=lowbit(x);
+            return ans;
+        }
+    }t; 
+    
+    int dis[maxn];
+    vector<int>d,st;
+    void Dfs(int u,int fa){
+        d.push_back(dis[u]);
+        for(auto[v,w]:e[u]) if(v!=fa&&!vis[v])
+            dis[v]=dis[u]+w,Dfs(v,u);
+    }
+    ll ans=0;
+    void Calc(int u){
+        for(auto[v,w]:e[u])if(!vis[v]){
+            dis[v]=w;
+            d.clear();
+            Dfs(v,u);
+            for(int k:d) if(k<=m)
+                ans+=t.Query(m-k);
+            for(int k:d) if(k<=m)
+                t.Add(k,1),st.push_back(k);
+        }
+        for(int k:st) t.Add(k,-1);
+        st.clear();
+    }
+    void Divide(int u){
+        Calc(u);
+        vis[u]=1;
+        for(auto[v,w]:e[u]) if(!vis[v]){
+            rt=0;
+            GetRT(v,u,siz[v]);
+            Divide(rt);
+        }
+    }
+    
+    void solve(){
+        GetRT(1,0,n);
+        Divide(rt);
+        cout<<ans<<'\n';
+    }
+    
+    void init(){
+        cin>>n;
+        int u,v,w;
+        for(int i=1;i<n;++i)
+            cin>>u>>v>>w,e[u].push_back({v,w}),e[v].push_back({u,w});
+        cin>>m;
+        t.Add(0,1);
+        mxp[0]=INF;
+    }
+    
+}
+
+struct DSegTree{
+    int root[maxn],idx;
+    struct Node{
+        int ls,rs,sum;
+    }t[maxn<<5];
+#define ls(p) t[p].ls
+#define rs(p) t[p].rs
+#define sum(p) t[p].sum
+    void PushUp(int p){
+        sum(p)=sum(ls(p))+sum(rs(p));
+    }
+    void Change(int &p,int l,int r,int x,int k){
+        if(!p) p=++idx;
+        if(l==r) return sum(p)+=k,void(); 
+        int mid=l+r>>1;
+        if(x<=mid) Change(ls(p),l,mid,x,k);
+        else Change(rs(p),mid+1,r,x,k);
+        PushUp(p);
+    }
+    int Query(int p,int l,int r,int L,int R){
+        if(l>R||r<L||!p) return 0;
+        if(L<=l&&R>=r) return sum(p);
+        int mid=l+r>>1;
+        return Query(ls(p),l,mid,L,R)+Query(rs(p),mid+1,r,L,R);
+    }
+    void Change(int u,int x,int k){
+        Change(root[u],0,n,x,k);
+    }
+    int Query(int u,int x){
+        return Query(root[u],0,n,0,x);
+    }
+};
+
+namespace CenTree{
+    int a[maxn];
+    vector<int>e[maxn];
+    struct CenTree{
+        int siz[maxn],mxp[maxn],cen,fa[maxn];
+        bitset<maxn>vis;
+        Tree lca;
+        DSegTree t,f;
+        int w[maxn];
+        void GetCen(int u,int fa,int tot){
+            siz[u]=1,mxp[u]=0;
+            for(int v:e[u]) if(v!=fa&&!vis[v])
+                GetCen(v,u,tot),siz[u]+=siz[v],mxp[u]=max(mxp[u],siz[v]);
+            mxp[u]=max(mxp[u],tot-siz[u]);
+            if(!cen||mxp[u]<mxp[cen]) cen=u;
+        }
+        void Build(int u,int tot){
+            vis[u]=1;
+            for(int v:e[u])if(!vis[v]){
+                cen=0;
+                tot=siz[v];
+                GetCen(v,u,tot);
+                fa[cen]=u;
+                Build(cen,tot);
+            }
+        }
+        void Change(int u,ll k){
+            int now=u;
+            while(now){
+                t.Change(now,lca.GetDis(u,now),k-w[u]);
+                if(fa[now]) f.Change(now,lca.GetDis(u,fa[now]),k-w[u]);
+                now=fa[now];
+            }
+            w[u]=k;
+        }
+        ll Query(int u,int k){
+            ll ans=0,now=u,pre=0;
+            while(now){
+                int dis=lca.GetDis(now,u);
+                if(dis<=k){
+                    ans+=t.Query(now,k-dis);
+                    if(pre) ans-=f.Query(pre,k-dis);
+                }
+                pre=now,now=fa[now];
+            }
+            return ans;
+        }
+        void Init(){
+            lca.Init();
+            GetCen(1,0,n);
+            Build(cen,n);
+            for(int i=1;i<=n;++i)
+                Change(i,a[i]);
+        }
+    }t;
+    void solve(){
+        ll lastans=0,op,x,k;
+        while(m--){
+            cin>>op>>x>>k;
+            x^=lastans,k^=lastans;
+            if(op) t.Change(x,k);
+            else cout<<(lastans=t.Query(x,k))<<'\n';
+        }
+    }
+    void init(){
+        cin>>n>>m;
+        for(int i=1;i<=n;++i)
+            cin>>a[i];
+        int u,v;
+        for(int i=1;i<n;++i)
+            cin>>u>>v,e[u].push_back(v),e[v].push_back(u);
+        t.Init();
+    }
+}
 
 void solve(){
     

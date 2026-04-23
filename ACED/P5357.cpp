@@ -12,30 +12,7 @@ using namespace std;
 const int maxn=1e6+10,INF=0x3f3f3f3f,mod=1e9+7;
 const double eps=1e-8,Pi=acos(-1);
 int n,m;
-
-struct KMP{
-    int fal[maxn];
-    void GetFail(char *b){
-        int j=0;
-        for(int i=2;i<=m;++i){
-            while(j&&b[j+1]!=b[i]) j=fal[j];
-            if(b[j+1]==b[i]) ++j;
-            fal[i]=j;
-        }
-    }
-    vector<int> kmp(char *a,char *b){
-        int j=0;
-        GetFail(b);
-        vector<int> ans;
-        for(int i=1;i<=n;++i){
-            while (j&&b[j+1]!=a[i])j=fal[j];
-            if(b[j+1]==a[i]) ++j;
-            if(j==m) ans.push_back(i-j+1),j=fal[j];
-        }
-        return ans;
-    }
-};
-
+string s;
 struct ACAM{
     struct Node{
         int ch[26],fal,cnt;
@@ -83,16 +60,19 @@ struct ACAM{
             ans.push_back(cnt(pos[i]));
         return ans;
     }
-};
-
-
-
+}t;
 
 void solve(){
-    
+    auto ans=t.Query(s);
+    for(int u:ans)
+        cout<<u<<'\n';
 }
 void init(){
-    
+    cin>>n;
+    for(int i=1;i<=n;++i)
+        cin>>s,t.Insert(s,i);
+    t.GetFail();
+    cin>>s;
 }
 int main(){
 #ifdef OPEN_FILE
