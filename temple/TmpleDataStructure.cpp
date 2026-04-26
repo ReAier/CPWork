@@ -310,6 +310,79 @@ struct SegTree{
     }
 };
 
+struct DSegTree{
+    int root[maxn],idx;
+    struct Node{
+        int ls,rs,sum;
+    }t[maxn<<5];
+#define ls(p) t[p].ls
+#define rs(p) t[p].rs
+#define sum(p) t[p].sum
+    void PushUp(int p){
+        sum(p)=sum(ls(p))+sum(rs(p));
+    }
+    void Change(int &p,int l,int r,int x,int k){
+        if(!p) p=++idx;
+        if(l==r) return sum(p)+=k,void(); 
+        int mid=l+r>>1;
+        if(x<=mid) Change(ls(p),l,mid,x,k);
+        else Change(rs(p),mid+1,r,x,k);
+        PushUp(p);
+    }
+    int Query(int p,int l,int r,int L,int R){
+        if(l>R||r<L||!p) return 0;
+        if(L<=l&&R>=r) return sum(p);
+        int mid=l+r>>1;
+        return Query(ls(p),l,mid,L,R)+Query(rs(p),mid+1,r,L,R);
+    }
+    void Change(int u,int x,int k){
+        Change(root[u],0,n,x,k);
+    }
+    int Query(int u,int x){
+        return Query(root[u],0,n,0,x);
+    }
+};
+
+struct CSegTree{
+    struct node{
+        int ls,rs,sum;
+    }t[maxn<<4];
+#define ls(p) t[p].ls
+#define rs(p) t[p].rs
+#define sum(p) t[p].sum
+    int root[maxn],idx;
+    int CopyNode(int p){
+        t[++idx]=t[p];
+        return idx;
+    }
+    void PushUp(int p){
+        sum(p)=sum(ls(p))+sum(rs(p));
+    }
+    void Change(int &p,int l,int r,int k){
+        p=CopyNode(p);
+        if(l==r) return sum(p)++,void();
+        int mid=l+r>>1;
+        if(k<=mid) Change(ls(p),l,mid,k);
+        else Change(rs(p),mid+1,r,k);
+        PushUp(p);
+    }
+    int Query(int u,int v,int l,int r,int k){
+        if(l==r) return l;
+        int s=sum(ls(v))-sum(ls(u)),mid=l+r>>1;
+        if(s>=k) return Query(ls(u),ls(v),l,mid,k);
+        return Query(rs(u),rs(v),mid+1,r,k-s);
+    }
+    int Query(int l,int r,int k){
+        return Query(root[l-1],root[r],1,n,k);
+    }
+    void Init(){
+        for(int i=1;i<=n;++i){
+            root[i]=root[i-1];
+            Change(root[i],1,n,a[i]);
+        }
+    }
+};
+
 struct BitTree2{
     unordered_map<int,int>t[maxn];
 #define lowbit(x) (x&(-x))
@@ -676,39 +749,6 @@ namespace NodeDivide{
     }
     
 }
-
-struct DSegTree{
-    int root[maxn],idx;
-    struct Node{
-        int ls,rs,sum;
-    }t[maxn<<5];
-#define ls(p) t[p].ls
-#define rs(p) t[p].rs
-#define sum(p) t[p].sum
-    void PushUp(int p){
-        sum(p)=sum(ls(p))+sum(rs(p));
-    }
-    void Change(int &p,int l,int r,int x,int k){
-        if(!p) p=++idx;
-        if(l==r) return sum(p)+=k,void(); 
-        int mid=l+r>>1;
-        if(x<=mid) Change(ls(p),l,mid,x,k);
-        else Change(rs(p),mid+1,r,x,k);
-        PushUp(p);
-    }
-    int Query(int p,int l,int r,int L,int R){
-        if(l>R||r<L||!p) return 0;
-        if(L<=l&&R>=r) return sum(p);
-        int mid=l+r>>1;
-        return Query(ls(p),l,mid,L,R)+Query(rs(p),mid+1,r,L,R);
-    }
-    void Change(int u,int x,int k){
-        Change(root[u],0,n,x,k);
-    }
-    int Query(int u,int x){
-        return Query(root[u],0,n,0,x);
-    }
-};
 
 namespace CenTree{
     int a[maxn];
