@@ -155,44 +155,56 @@ void Tarjan(int u,int in=0){ // in用于判断edcc,vdcc
 #pragma endregion
 
 #pragma region Dinic
-int s,t,cur[maxn],dis[maxn];
-ll Dfs(int u,ll las){
-    if(u==t) return las;
-    ll res=0;
-    for(int i=cur[u];i&&las;i=e[i].nx){
-        cur[u]=i;
-        ll v=e[i].v,w=min(las,e[i].w);
-        if(dis[v]==dis[u]+1&&w){
-            ll k=Dfs(v,w);
-            res+=k,las-=k;
-            e[i].w-=k,e[i^1].w+=k;
-        }
+namespace Dinic{
+    struct Edge{
+        ll v,w,nx;
+    }e[maxn];
+    int head[maxn],idx=1;
+    void AddEdge(int u,int v,int w){
+        e[++idx]={v,w,head[u]};
+        head[u]=idx;
+        e[++idx]={u,0,head[v]};
+        head[v]=idx;
     }
-    if(!res) dis[u]=INF;
-    return res;
-}
-bool Bfs(int s,int t){
-    queue<int>q;
-    memcpy(cur,head,sizeof(head));
-    memset(dis,0x3f,sizeof(dis));
-    q.push(s);
-    dis[s]=0;
-    while(!q.empty()){
-        int u=q.front();q.pop();
-        for(int i=head[u];i;i=e[i].nx){
-            int v=e[i].v,w=e[i].w;
-            if(dis[v]==INF&&w)
-                dis[v]=dis[u]+1,q.push(v);
+    int s,t,cur[maxn],dis[maxn];
+    ll Dfs(int u,ll las){
+        if(u==t) return las;
+        ll res=0;
+        for(int i=cur[u];i&&las;i=e[i].nx){
+            cur[u]=i;
+            ll v=e[i].v,w=min(las,e[i].w);
+            if(dis[v]==dis[u]+1&&w){
+                ll k=Dfs(v,w);
+                res+=k,las-=k;
+                e[i].w-=k,e[i^1].w+=k;
+            }
         }
+        if(!res) dis[u]=INF;
+        return res;
     }
-    return dis[t]!=INF;
-}
-ll Flow(int S,int T){
-    ll ans=0;
-    s=S,t=T;
-    while(Bfs(s,t))
-        ans+=Dfs(s,INF);
-    return ans;
+    bool Bfs(int s,int t){
+        queue<int>q;
+        memcpy(cur,head,sizeof(head));
+        memset(dis,0x3f,sizeof(dis));
+        q.push(s);
+        dis[s]=0;
+        while(!q.empty()){
+            int u=q.front();q.pop();
+            for(int i=head[u];i;i=e[i].nx){
+                int v=e[i].v,w=e[i].w;
+                if(dis[v]==INF&&w)
+                    dis[v]=dis[u]+1,q.push(v);
+            }
+        }
+        return dis[t]!=INF;
+    }
+    ll Flow(int S,int T){
+        ll ans=0;
+        s=S,t=T;
+        while(Bfs(s,t))
+            ans+=Dfs(s,INF);
+        return ans;
+    }
 }
 #pragma endregion
 

@@ -825,6 +825,198 @@ namespace CenTree{
     }
 }
 
+namespace C_Mo{
+    int Blen;
+    struct Query{
+        int l,r,t,id;
+        bool operator<(Query x){
+            if(t/Blen!=x.t/Blen) return t>x.t;
+            if(l/Blen!=x.l/Blen) return (t/Blen&1)? l<x.l:l>x.l;
+            return (l/Blen&1)?r<x.r:r>x.r;
+        }
+    }q[maxn];
+    struct Change{
+        int pos,pre,now;
+    }c[maxn];
+    int l=1,r=0,t;
+    int a[maxn],m1,m2,ans[maxn];
+    int cnt[maxn],res;
+    
+    void Add(int u){
+        if(!(cnt[u]++)) res++;
+    }
+    void Del(int u){
+        if(!(--cnt[u])) res--;
+    }
+    void Cha(int u,bool i){
+        auto [pos,pre,now]=c[u];
+        if(i){
+            if(pos>=l&&pos<=r)
+                Del(pre),Add(now);
+            a[pos]=now;
+        }else{
+            if(pos>=l&&pos<=r)
+                Del(now),Add(pre);
+            a[pos]=pre;
+        }
+    }
+    
+    void solve(){
+        t=m2;
+        for(int i=1;i<=m1;++i){
+            while(t<q[i].t) Cha(++t,1);
+            while(t>q[i].t) Cha(t--,0);
+            while(r<q[i].r) Add(a[++r]);
+            while(l>q[i].l) Add(a[--l]);
+            while(r>q[i].r) Del(a[r--]);
+            while(l<q[i].l) Del(a[l++]);
+            ans[q[i].id]=res;
+        }
+        for(int i=1;i<=m1;++i)
+            cout<<ans[i]<<'\n';
+    }
+    void init(){
+        cin>>n>>m;
+        Blen=pow(n,0.7);
+        for(int i=1;i<=n;++i) cin>>a[i];
+        char ch;
+        int u,v;
+        while(m--){
+            cin>>ch>>u>>v;
+            if(ch=='Q') q[++m1]={u,v,m2,m1};
+            else c[++m2]={u,a[u],v},a[u]=v;
+        }
+        sort(q+1,q+1+m1);
+    }
+}
+
+namespace Mo{
+    struct BIT{
+        int t[maxn];
+        #define lowbit(x) (x&(-x))
+        #define LOG 17
+            void Add(int x,int k){
+                while(x<=maxn){
+                    t[x]+=k;
+                    x+=lowbit(x);
+                }
+            }
+            int Query(){
+                int pos=0,nx;
+                for(int i=LOG;i>=0;--i){
+                    nx=pos+(1<<i);
+                    if(t[nx]==(1<<i))
+                        pos=nx;
+                }
+                return pos+1;
+            }
+    }t;
+    int Blen;
+    struct Que{
+        int l,r,id;
+        bool operator<(Que x){
+            if(l/Blen!=x.l/Blen) return l<x.l;
+            return (r<x.r);
+        }
+    }q[maxn];
+    int cnt[maxn],ans[maxn];
+    void Add(int x){
+        if(!(cnt[x]++)) t.Add(x,1);
+    }
+    void Del(int x){
+        if(!(--cnt[x])) t.Add(x,-1);
+    }
+    void solve(){
+        int l=1,r=0;
+        for(int i=1;i<=m;++i){
+            while(r<q[i].r) Add(a[++r]);
+            while(l>q[i].l) Add(a[--l]);
+            while(r>q[i].r) Del(a[r--]);
+            while(l<q[i].l) Del(a[l++]);
+            ans[q[i].id]=t.Query()-1;
+        }
+        for(int i=1;i<=m;++i)   
+            printf("%d\n",ans[i]);
+    }
+    void init(){
+        cin>>n>>m;
+        Blen=sqrt(n);
+        for(int i=1;i<=n;++i)
+            cin>>a[i],a[i]++;
+        for(int i=1;i<=m;++i)
+            cin>>q[i].l>>q[i].r,q[i].id=i;
+        sort(q+1,q+1+m);
+    }
+}
+
+// 区间加，区间询问>=C
+struct Block1{
+    int a[maxn],c[maxn],tag[maxn];
+    int Bnum,Blen;
+    int b[maxn];
+    void PushDown(int bi){
+        if(!tag[bi]) return;
+        for(int i=b[bi-1]+1;i<=b[bi];++i)
+            a[i]+=tag[bi],c[i]+=tag[bi];
+        tag[bi]=0;
+    }
+    // 重构
+    void Make(int bi){
+        PushDown(bi);
+        for(int i=b[bi-1]+1;i<=b[bi];++i)
+            c[i]=a[i];
+        sort(c+b[bi-1]+1,c+b[bi]+1);
+    }
+    // 在 c 中查找 >= k 的元素个数
+    int Find(int bi,int k){
+        int l=b[bi-1]+1,r=b[bi];
+        if(c[r]<k) return 0;
+        while(l<r){
+            int mid=l+r>>1;
+            if(c[mid]>=k) r=mid;
+            else l=mid+1;
+        }
+        return b[bi]-r+1;
+    }
+    int Query(int l,int r,int k){
+        int ql=(l-1)/Blen+1,qr=min((r-1)/Blen+1,Bnum),ans=0;
+        PushDown(ql);
+        for(int i=l;i<=min(b[ql],r);++i)
+            ans+=a[i]>=k;
+        if(ql!=qr){
+            PushDown(qr);
+            for(int i=b[qr-1]+1;i<=r;++i)
+                ans+=a[i]>=k;
+        }
+        for(int i=ql+1;i<qr;++i)
+            ans+=Find(i,k-tag[i]);
+        return ans;
+    }
+    void Add(int l,int r,int k){
+        int ql=(l-1)/Blen+1,qr=min((r-1)/Blen+1,Bnum);
+        for(int i=l;i<=min(b[ql],r);++i)
+            a[i]+=k;
+        Make(ql);
+        if(ql!=qr){
+            for(int i=b[qr-1]+1;i<=r;++i)
+                a[i]+=k;
+            Make(qr);
+        }
+        for(int i=ql+1;i<qr;++i)
+            tag[i]+=k;
+    }
+    void init(){
+        Blen=sqrt(n);
+        Bnum=n/Blen+(Blen*Blen<n);
+        for(int i=1;i<Bnum;++i)
+            b[i]=i*Blen;
+        b[Bnum]=n;
+        for(int i=1;i<=Bnum;++i)
+            Make(i);
+    }
+};
+
+
 void solve(){
     
 }
