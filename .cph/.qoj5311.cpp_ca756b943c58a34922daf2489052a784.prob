@@ -1,0 +1,1 @@
+{"name":"Local: qoj5311","url":"d:\\CPWork\\qoj5311.cpp","tests":[{"id":1779591624810,"input":"5 3\naac\noiputata\naaa\nsuikabudada\naba\nabcdefghijklmnopqrstuvwxyz\nqwertyuiopasdfghjklzxcvbnm\naquickbrownfxjmpsvethlzydg","output":"4\n3\n4"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\CPWork\\qoj5311.cpp","group":"local","local":true}

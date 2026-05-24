@@ -14,13 +14,13 @@ const double eps=1e-8,Pi=acos(-1);
 int n,m;
 
 
-void solve(){
+void solve() {
     
 }
-void init(){
+void init() {
     
 }
-int main(){
+int main() {
 #ifdef OPEN_FILE
     freopen("in.txt","r",stdin);
     freopen("out.txt","w",stdout);
@@ -31,8 +31,8 @@ int main(){
     // ios::sync_with_stdio(false),cin.tie(nullptr),cout.tie(nullptr);
     int T=1;
     // cin>>T;
-    // while(cin>>n){
-    while(T--){
+    // while(cin>>n) {
+    while(T--) {
         init();
         solve();
     }

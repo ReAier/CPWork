@@ -19,7 +19,9 @@ struct Tag{
 };
 struct Info{
     Info(){}
+    void reverse(){}
     Info operator+(const Info &x)const{}
+    Info operator-(const Info &x)const{}
     Info operator+(const Tag &x)const{}
 };
 
@@ -404,35 +406,47 @@ struct BitTree2{
     }
 };
 
+// LCT + 维护子树，带逆元信息
+// reverse 无交换律信息需要反转
+// 路径修改和子树查询冲突，不要一起使用！
+// 无逆元版本需要使用 multiset 维护，复杂度多个log
 struct LCT{
     struct Node{
         int ch[2],rev,fa;
         Info val,sum;
         Tag tag;
+        Info vsum,tsum;
     }t[maxn];
 #define ls(p) t[p].ch[0]
 #define rs(p) t[p].ch[1]
 #define ch(p) t[p].ch
 #define val(p) t[p].val
 #define sum(p) t[p].sum
+#define vsum(p) t[p].vsum
+#define tsum(p) t[p].tsum
 #define rev(p) t[p].rev
 #define tag(p) t[p].tag
 #define fa(p) t[p].fa
     int idx,rt;
     void Rev(int p){
-        swap(rs(p),ls(p));
+        if(!p) return;
+        swap(ls(p),rs(p));
+        sum(p).reverse();
         rev(p)^=1;
     }
     int NewNode(Info val){
-        t[++idx]={0,0,0,0,val,val,{}};
+        t[++idx]={0,0,0,0,val,val,{},{},val};
         return idx;
     }
     void AddTag(int p,Tag k){
-        sum(p)=sum(p)+k,val(p)=val(p)+k;
+        if(!p) return;
+        sum(p)=sum(p)+k;
+        val(p)=val(p)+k;
         tag(p)=tag(p)+k;
     }
     void PushUp(int p){
         sum(p)=sum(ls(p))+val(p)+sum(rs(p));
+        tsum(p)=tsum(ls(p))+val(p)+tsum(rs(p))+vsum(p);
     }
     void PushDown(int p){
         if(rev(p)) Rev(ls(p)),Rev(rs(p)),rev(p)=0;
@@ -468,6 +482,8 @@ struct LCT{
     void Access(int p){
         for(int sp=0;p;sp=p,p=fa(p)){
             Splay(p);
+            vsum(p)=vsum(p)+tsum(rs(p));
+            vsum(p)=vsum(p)-tsum(sp);
             rs(p)=sp;
             PushUp(p);
         }
@@ -487,8 +503,11 @@ struct LCT{
     }
     void Link(int u,int v){
         MakeRoot(u);
-        if(FindRoot(v)!=u)
-            fa(u)=v;
+        if(FindRoot(v)!=u){
+            Access(v),Splay(v),fa(u)=v;
+            vsum(v)=vsum(v)+tsum(u);
+        }
+        PushUp(v);
     }
     void Cut(int u,int v){
         MakeRoot(u);
@@ -504,6 +523,18 @@ struct LCT{
         Splay(v);
         return sum(v);
     }
+    Info QuerySub(int u,int rt){
+        MakeRoot(rt);
+        Access(u);
+        Splay(u);
+        return val(u)+vsum(u);
+    }
+    void Change(int u,Info k){
+        Access(u);
+        Splay(u);
+        val(u)=k;
+        PushUp(u);
+    }
     void Add(int u,int v,Tag k){
         MakeRoot(u);
         Access(v);
@@ -512,6 +543,7 @@ struct LCT{
     }
     void Init(){
         val(0)=sum(0)={};
+        vsum(0)=tsum(0)={};
         tag(0)={};
     }
 };
@@ -1016,6 +1048,178 @@ struct Block1{
     }
 };
 
+
+// 强制在线区间众数
+namespace Block2{
+    const int Blen=200;
+    int a[maxn],s[maxn][Blen+10],p[Blen+10][Blen+10],Bnum;
+    map<int,int>mp;
+    int b[maxn],idx;
+    int cnt[maxn],mx;
+    
+    vector<int>st;
+    
+    int Query(int l,int r){
+        int ql=(l-1)/Blen+1,qr=min((r-1)/Blen+1,Bnum),ans=0;
+        for(int i=l;i<=min(ql*Blen,r);++i){
+            if(!cnt[a[i]])
+                st.push_back(a[i]);
+            cnt[a[i]]++;
+        }
+        if(ql!=qr) for(int i=(qr-1)*Blen+1;i<=r;++i){
+            if(!cnt[a[i]])
+                st.push_back(a[i]);
+            cnt[a[i]]++;
+        }
+        if(ql+1<=qr-1&&!cnt[p[ql+1][qr-1]])
+            st.push_back(p[ql+1][qr-1]);
+        for(int u:st){
+            int cntu=cnt[u]+max(0,s[u][qr-1]-s[u][ql]);
+            int cntv=cnt[ans]+max(0,s[ans][qr-1]-s[ans][ql]);
+            if(cntu>cntv||(cntu==cntv&&u<ans))
+                ans=u;
+        }
+        for(int u:st)
+            cnt[u]=0;
+        st.clear();
+        return b[ans];
+    }
+    
+    void solve(){
+        memset(cnt,0,sizeof(cnt));
+        int l,r,lastans=0;
+        while(m--){
+            cin>>l>>r;
+            l=(l+lastans-1)%n;
+            r=(r+lastans-1)%n;
+            if(l>r) swap(l,r);
+            cout<<(lastans=Query(l+1,r+1))<<'\n';
+        }
+    }
+    int c[maxn];
+    void init(){
+        cin>>n>>m;
+        Bnum=n/Blen+bool(n%Blen);
+        for(int i=1;i<=n;++i)
+            cin>>a[i],c[i]=a[i];
+        sort(c+1,c+1+n);
+        for(int i=1;i<=n;++i) if(!mp[c[i]]) 
+            mp[c[i]]=++idx,b[idx]=c[i];
+        for(int i=1;i<=n;++i)
+            a[i]=mp[a[i]];
+    
+        for(int i=1;i<=Bnum;++i){
+            for(int j=1;j<=idx;++j)
+                s[j][i]+=s[j][i-1];
+            for(int j=(i-1)*Blen+1;j<=min(n,i*Blen);++j)
+                s[a[j]][i]++;
+        }
+    
+        for(int i=1;i<=Bnum;++i) {
+            memset(cnt,0,sizeof(cnt));
+            for(int j=i;j<=Bnum;++j) {
+                for(int k=(j-1)*Blen+1;k<=min(n,j*Blen);++k) {
+                    cnt[a[k]]++;
+                    if(cnt[a[k]]>cnt[mx]||(cnt[a[k]]==cnt[mx]&&a[k]<mx))
+                        mx=a[k];
+                }
+                p[i][j]=mx;
+            }
+        }
+    }
+}
+
+// 可撤销并查集
+struct Dsu{
+    int fa[maxn],siz[maxn];
+    stack<pair<int,int>>s;
+    void Init(){
+        for(int i=1;i<=n;++i)
+            fa[i]=i,siz[i]=1;
+    }
+    int Find(int x){
+        while(x!=fa[x]) x=fa[x];
+        return x;
+    }
+    void Merge(int u,int v){
+        u=Find(u),v=Find(v);
+        if(u==v) return s.push({0,0});
+        if(siz[u]<siz[v]) swap(u,v);
+        fa[v]=u;
+        siz[u]+=siz[v];
+        s.push({v,siz[v]});
+    }
+    void Undo(int k){
+        while(k--){
+            auto [v,sz]=s.top();s.pop();
+            int u=fa[v];
+            siz[u]-=sz;
+            fa[v]=v;
+        }
+    }
+};
+
+// 线段树分治，离线动态图联通性
+namespace SegTreeDivide{
+    pair<int,int>Qu[maxn];
+    int ans[maxn];
+    Dsu s;
+    struct SegTree{
+        struct Node{
+            vector<pair<int,int>>edg;
+        }t[maxn<<2];
+    #define ls(p) (p<<1)
+    #define rs(p) (p<<1|1)
+    #define edg(p) t[p].edg
+        void Insert(int p,int l,int r,int L,int R,pair<int,int> k){
+            if(L<=l&&R>=r) 
+                return edg(p).push_back(k);
+            if(l>R||r<L) return;
+            int mid=l+r>>1;
+            Insert(ls(p),l,mid,L,R,k);
+            Insert(rs(p),mid+1,r,L,R,k);
+        }
+        void Dfs(int p,int l,int r){
+            for(auto [u,v]:edg(p))
+                s.Merge(u,v);
+            if(l==r){
+                auto [u,v]=Qu[l];
+                if(u&&v) ans[l]=s.Find(u)==s.Find(v);
+                else ans[l]=-1;
+            }else{
+                int mid=l+r>>1;
+                Dfs(ls(p),l,mid);
+                Dfs(rs(p),mid+1,r);
+            }s.Undo(edg(p).size());
+        }
+        void Insert(int l,int r,pair<int,int>k){
+            Insert(1,1,m,l,r,k);
+        }
+    }t;
+    void solve(){
+        t.Dfs(1,1,m);
+        for(int i=1;i<=m;++i) if(~ans[i])
+            cout<<(ans[i]?'Y':'N')<<'\n';
+    }
+    map<pair<int,int>,int>mp;
+    void init(){
+        cin>>n>>m;
+        int op,u,v;
+        for(int i=1;i<=m;++i){
+            cin>>op>>u>>v;
+            if(u>v) swap(u,v);
+            if(op==1) {
+                t.Insert(mp[{u,v}],i-1,{u,v});
+                mp.erase({u,v});
+            }else if(!op)
+                mp[{u,v}]=i;
+            else Qu[i]={u,v};
+        }
+        for(auto [e,l]:mp)
+            t.Insert(l,m,e);
+        s.Init();
+    }
+}
 
 void solve(){
     

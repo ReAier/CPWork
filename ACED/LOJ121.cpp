@@ -100,6 +100,7 @@ void init(){
         t.Insert(l,m,e);
     s.Init();
 }
+
 int main(){
 #ifdef OPEN_FILE
     freopen("in.txt","r",stdin);
