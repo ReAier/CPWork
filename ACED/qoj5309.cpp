@@ -11,15 +11,40 @@
 using namespace std;
 const int maxn=1e6+10,INF=0x3f3f3f3f,mod=1e9+7;
 const double eps=1e-8,Pi=acos(-1);
-mt19937_64 mt(1145);
+mt19937 mt(1145);
 int n,m;
-
+int B1=4000,B2=2500;
+int Mx,now;
+map<int,int>mp;
+void Work(int x) {
+    cout<<"walk "<<x<<endl;
+    cin>>now;
+}
+void Guess(int x) {
+    cout<<"guess "<<x<<endl;
+    exit(0);
+}
 
 void solve() {
-    
+    for(int i=1;i<=B2;++i) {
+        Work(1);
+        if(mp.count(now)) 
+            Guess(i-mp[now]);
+        mp[now]=i;
+    }
+    if(Mx>B2) Work(Mx-B2);
+    for(int pos=max(Mx,B2);;pos+=B2) {
+        if(mp.count(now)) 
+            Guess(pos-mp[now]);
+        Work(B2);
+    }
 }
 void init() {
-    
+    for(int i=1;i<=B1;++i) {
+        Work(mt()%int(1e9));
+        Mx=max(Mx,now);
+    }
+    mp[now]=0;
 }
 int main() {
 #ifdef OPEN_FILE

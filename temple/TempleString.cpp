@@ -85,7 +85,25 @@ struct ACAM{
     }
 };
 
-
+struct Trie {
+    struct Node { 
+        int ch[26],cnt,ed;
+    }t[maxn];
+#define ch(p) t[p].ch
+#define cnt(p) t[p].cnt
+#define ed(p) t[p].ed
+    int idx,rt;
+    void Insert(string s) {
+        int now = rt;
+        for(char c:s) {
+            if(!ch(now)[c-'a']) 
+                ch(now)[c-'a'] = ++idx;
+            now = ch(now)[c-'a'];
+            cnt(now)++;
+        }
+        ed(now)++;
+    }
+};
 
 
 void solve(){

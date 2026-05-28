@@ -15,10 +15,11 @@ ll n,m;
 ll sum[30][30],B;
 struct Trie {
     struct Node { 
-        ll ch[26],cnt;
+        ll ch[26],cnt,ed;
     }t[maxn];
 #define ch(p) t[p].ch
 #define cnt(p) t[p].cnt
+#define ed(p) t[p].ed
     int idx,rt;
     void Insert(string s) {
         int now = rt;
@@ -30,7 +31,8 @@ struct Trie {
             now = ch(now)[c-'a'];
             cnt(now)++;
         }
-        B += cnt(now)-1;
+        ed(now)++;
+        B += cnt(now)-ed(now);
     }
 }t;
 
