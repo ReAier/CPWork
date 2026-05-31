@@ -1,0 +1,1 @@
+{"name":"Local: qoj5455","url":"d:\\CPWork\\qoj5455.cpp","tests":[{"id":1780061179754,"input":"2\n3\n0 1 2\n7\n0 1 2 2 1 4 1","output":"1\n2"}],"interactive":false,"memoryLimit":1024,"timeLimit":3000,"srcPath":"d:\\CPWork\\qoj5455.cpp","group":"local","local":true}

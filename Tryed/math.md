@@ -3,6 +3,7 @@
 ## 简单
 
 [$Qoj5304$](https://qoj.ac/contest/1071/problem/5304)
+[$Qoj5465$](https://qoj.ac/contest/1071/problem/5465)
 
 ## 中等
 
